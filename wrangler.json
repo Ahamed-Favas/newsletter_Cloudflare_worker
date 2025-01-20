@@ -12,12 +12,20 @@
   },
   // "triggers": {
   //   "crons": [
-  //     "0 */6 * * *"
+  //     "0 */6 * * *",
+  //     "0 0 */3 * *"
   //   ]
   // },
   "ai": {
     "binding": "AI"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "d1-feeds",
+      "database_id": "ebe0200c-feef-49f9-bf1b-08b78776ea8c"
+    }
+  ]
   /**
    * Smart Placement
    * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
