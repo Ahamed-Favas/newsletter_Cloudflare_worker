@@ -22,8 +22,8 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "d1-feeds",
-      "database_id": "ebe0200c-feef-49f9-bf1b-08b78776ea8c"
+      "database_name": "rss-feeds-d1",
+      "database_id": "9201fab0-c3ad-46c1-a767-0b03451161c0"
     }
   ]
   /**

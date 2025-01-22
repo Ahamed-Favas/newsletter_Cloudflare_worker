@@ -1,7 +1,6 @@
 import { sendEmail } from "./services/mailer";
 import { parseFeed } from "./actions/parseRss";
-
-const timesofindia_topstories = "https://timesofindia.indiatimes.com/rssfeedstopstories.cms";
+import { sources } from "./feeds/sources";
 
 export default {
   async fetch(request, env, ctx) {
@@ -28,6 +27,21 @@ export default {
         return new Response("Missing params in request body", { status: 400 });
       }
       if ( userFeed === "timesofindia_topstories" ) {
+        const feedContent =  await parseFeed(sources, env);
+        console.log("feedContent.length", feedContent.length)
+        try {
+          for (const item of feedContent) {
+              // console.log(`Index: ${feedContent.indexOf(item)}, Content: ${item.content}`);
+              await env.DB.prepare(
+                "INSERT INTO NewsCollection (Feed, Title, Link, pubDate, Id, Description, Content) VALUES (?, ?, ?, ?, ?, ?, ?)"
+              ).bind(item.feed, item.title, item.link, item.pubDate, item.id, item.description, item.content)
+              .run();
+          }
+        } catch (error) {
+            console.error("Error occured while aading to db", error)
+            return new Response("Some records failed to insert", { status: 500 });
+        }
+        return new Response("All records inserted successfully", { status: 200 });
         // Task to do mailing, after fetching from db and done processing by ai 
       }
     return new Response("user is validated")
@@ -74,16 +88,17 @@ async function handleScheduledTask(env) {
   //   }
   // }
 
-  try {
-    // const goodMorningMessage = await getGoodMorningMessage();
-    const feedContent =  await parseFeed([timesofindia_topstories], env);
-    const emailHtml = await generateEmail(feedContent);
-    const emailResponse = await sendEmail(emailHtml);
+  // try {
+  //   // const goodMorningMessage = await getGoodMorningMessage();
+  //   const feedContent =  await parseFeed(sources, env);
+  //   return new Response(feedContent)
+  //   // const emailHtml = await generateEmail(feedContent);
+  //   // const emailResponse = await sendEmail(emailHtml);
 
-    return emailResponse && emailResponse.ok;
-  } catch (error) {
-    console.error("Task execution failed:", error);
-    return false;
-  }
-  return
+  //   return emailResponse && emailResponse.ok;
+  // } catch (error) {
+  //   console.error("Task execution failed:", error);
+  //   return false;
+  // }
+  // return
 }
