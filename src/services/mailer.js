@@ -1,5 +1,6 @@
 export async function sendEmail(env, emailHtml, userEmail) {
     try {
+      const today = getTodayDate()
       const response = await fetch(`https://api.mailgun.net/v3/${env.mailGunDomain}/messages`, {
         method: "POST",
         headers: {
@@ -9,7 +10,7 @@ export async function sendEmail(env, emailHtml, userEmail) {
         body: new URLSearchParams({
           from: env.mailGunFromAddress,
           to: userEmail,
-          subject: "Good Morning!",
+          subject: `Good Morning! Today is ${today}`,
           html: emailHtml,
         })
       });
@@ -23,4 +24,15 @@ export async function sendEmail(env, emailHtml, userEmail) {
       console.error("Error sending email:", error);
       return false;
     }
+}
+
+export function getTodayDate() {
+  const currDate = new Date()
+  return currDate.toLocaleDateString(
+    undefined, {
+      weekday: "long",
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    })
 }

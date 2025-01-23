@@ -1,6 +1,3 @@
-TODO  learn cron.org api
-TODO  bind a db, think kv or durable
-TODO  think hashing
-TODO  Add a mechanism to save every 6 hr data into db, while saving, delete data of same source if existing data is older than 2 days
-TODO  When cron-org requests, deliver email with past 24 data after llama
-TODO  aware timeframe collisions 
+TODO  save ai generated content
+TODO  think frontend
+TODO  integrate cron and nextauth/clerk in frontend
