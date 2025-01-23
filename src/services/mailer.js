@@ -1,4 +1,4 @@
-export async function sendEmail(emailHtml) {
+export async function sendEmail(env, emailHtml, userEmail) {
     try {
       const response = await fetch(`https://api.mailgun.net/v3/${env.mailGunDomain}/messages`, {
         method: "POST",
@@ -8,7 +8,7 @@ export async function sendEmail(emailHtml) {
         },
         body: new URLSearchParams({
           from: env.mailGunFromAddress,
-          to: env.mailGunToAddress,
+          to: userEmail,
           subject: "Good Morning!",
           html: emailHtml,
         })

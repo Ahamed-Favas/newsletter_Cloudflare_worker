@@ -46,6 +46,7 @@ export async function parseFeed(sources, env) {
         const name = source.name;
         const url = source.url;
         const contentClass = source.contentClass;
+        const category = source.category;
         try {
             const response = await fetchUrl(url, env, true);
             const text = await response.text();
@@ -70,6 +71,7 @@ export async function parseFeed(sources, env) {
                         if ( !content ) return null;
                         return {
                             feed: name,
+                            category: category,
                             title: item.getElementsByTagName("title")[0]?.textContent || "No Title",
                             link: link,
                             pubDate: parseDate(pubDateStr).toISOString(),
@@ -99,6 +101,7 @@ export async function parseFeed(sources, env) {
                         if ( !content ) return null;
                         return {
                             feed: name,
+                            category: category,
                             title: entry.getElementsByTagName("title")[0]?.textContent || "No Title",
                             link: link,
                             pubDate: parseDate(pubDateStr).toISOString(),

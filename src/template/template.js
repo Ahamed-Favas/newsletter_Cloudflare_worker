@@ -13,21 +13,18 @@ export function generateEmail(feedsData) {
         const items = feed.items.map(item => `
             <article style="margin-bottom: 30px; padding: 20px; background-color: #fff; border: 1px solid #e0e4e8; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); transition: transform 0.2s ease, box-shadow 0.2s ease;">
                 <span style="display: inline-block; padding: 4px 10px; background-color: #e8f4fc; color: #3498db; border-radius: 12px; font-size: 12px; font-weight: bold; margin-bottom: 10px;">
-                    ${sanitizeHtml(item.category ? item.category.trim() : '')}
+                    ${sanitizeHtml(item.Category ? item.Category.trim() : '')}
                 </span>
                 <h2 style="font-size: 20px; color: #2c3e50; margin: 0 0 10px 0; font-weight: 700;">
-                    ${sanitizeHtml(item.title ? item.title.trim() : 'Untitled')}
+                    ${sanitizeHtml(item.Title ? item.Title.trim() : 'Untitled')}
                 </h2>
                 <div style="font-size: 14px; color: #666; margin-bottom: 15px;">
                     Published on ${sanitizeHtml(item.pubDate ? item.pubDate.trim() : '')}
                 </div>
-                <p style="color: #555; margin-bottom: 15px;">
-                    ${sanitizeHtml(item.summary ? item.summary.trim() : 'No summary available')}
-                </p>
                 <p style="color: #5a7997; margin-bottom: 15px; font-size: 16px;">
-                    ${sanitizeHtml(item.article ? item.article.trim() : '')}
+                    ${sanitizeHtml(item.Content ? item.Content.trim() : '')}
                 </p>
-                ${item.url ? `<a href="${sanitizeHtml(item.url)}" style="display: inline-block; padding: 8px 20px; background-color: #3498db; color: #ffffff; text-decoration: none; border-radius: 4px; font-size: 14px; font-weight: bold; transition: background-color 0.3s ease;">Read Full Article</a>` : ''}
+                ${item.Link ? `<a href="${sanitizeHtml(item.Link)}" style="display: inline-block; padding: 8px 20px; background-color: #3498db; color: #ffffff; text-decoration: none; border-radius: 4px; font-size: 14px; font-weight: bold; transition: background-color 0.3s ease;">Read Original Article</a>` : ''}
             </article>
         `).join('');
         return `
