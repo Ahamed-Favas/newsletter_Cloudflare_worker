@@ -9,30 +9,23 @@ function sanitizeHtml(str) {
 }
 
 export function generateEmail(feedsData) {
-    const feedHTML = feedsData.map(feed => {
-        const items = feed.items.map(item => `
-            <article style="margin-bottom: 30px; padding: 20px; background-color: #fff; border: 1px solid #e0e4e8; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); transition: transform 0.2s ease, box-shadow 0.2s ease;">
-                <span style="display: inline-block; padding: 4px 10px; background-color: #e8f4fc; color: #3498db; border-radius: 12px; font-size: 12px; font-weight: bold; margin-bottom: 10px;">
-                    ${sanitizeHtml(item.Category ? item.Category.trim() : '')}
-                </span>
-                <h2 style="font-size: 20px; color: #2c3e50; margin: 0 0 10px 0; font-weight: 700;">
-                    ${sanitizeHtml(item.Title ? item.Title.trim() : 'Untitled')}
-                </h2>
-                <div style="font-size: 14px; color: #666; margin-bottom: 15px;">
-                    Published on ${sanitizeHtml(item.pubDate ? item.pubDate.trim() : '')}
-                </div>
-                <p style="color: #5a7997; margin-bottom: 15px; font-size: 16px;">
-                    ${sanitizeHtml(item.Content ? item.Content.trim() : '')}
-                </p>
-                ${item.Link ? `<a href="${sanitizeHtml(item.Link)}" style="display: inline-block; padding: 8px 20px; background-color: #3498db; color: #ffffff; text-decoration: none; border-radius: 4px; font-size: 14px; font-weight: bold; transition: background-color 0.3s ease;">Read Original Article</a>` : ''}
-            </article>
-        `).join('');
-        return `
-            <div style="padding: 20px 0;">
-                ${items}
+    const feedHTML = feedsData.map(feed => `
+        <article style="margin-bottom: 30px; padding: 20px; background-color: #fff; border: 1px solid #e0e4e8; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); transition: transform 0.2s ease, box-shadow 0.2s ease;">
+            <span style="display: inline-block; padding: 4px 10px; background-color: #e8f4fc; color: #3498db; border-radius: 12px; font-size: 12px; font-weight: bold; margin-bottom: 10px;">
+                ${sanitizeHtml(feed.Category ? feed.Category.trim() : '')}
+            </span>
+            <h2 style="font-size: 20px; color: #2c3e50; margin: 0 0 10px 0; font-weight: 700;">
+                ${sanitizeHtml(feed.Title ? feed.Title.trim() : 'Untitled')}
+            </h2>
+            <div style="font-size: 14px; color: #666; margin-bottom: 15px;">
+                Published on ${sanitizeHtml(feed.pubDate ? feed.pubDate.trim() : '')}
             </div>
-        `;
-    }).join('');
+            <p style="color: #5a7997; margin-bottom: 15px; font-size: 16px;">
+                ${sanitizeHtml(feed.Content ? feed.Content.trim() : '')}
+            </p>
+            ${feed.Link ? `<a href="${sanitizeHtml(feed.Link)}" style="display: inline-block; padding: 8px 20px; background-color: #3498db; color: #ffffff; text-decoration: none; border-radius: 4px; font-size: 14px; font-weight: bold; transition: background-color 0.3s ease;">Read Original Article</a>` : ''}
+        </article>
+    `).join('');
     return `
         <html lang="en">
         <head>
@@ -45,9 +38,9 @@ export function generateEmail(feedsData) {
                 <div style="text-align: center; padding: 20px 0; border-bottom: 1px solid #e0e4e8;">
                     <h1 style="font-size: 26px; color: #2c3e50; margin: 0; font-weight: 700;">Weekly Newsletter</h1>
                 </div>
-
-                ${feedHTML}
-
+                <div style="padding: 20px 0;">
+                    ${feedHTML}
+                </div>
                 <div style="text-align: center; padding: 20px; color: #666; font-size: 12px; border-top: 1px solid #e0e4e8;">
                     <p>You're receiving this email because you subscribed to newsletter@pastpricing.com.</p>
                 </div>

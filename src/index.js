@@ -37,10 +37,13 @@ export default {
           const { results } = await env.DB.prepare(
             "SELECT * FROM NewsCollection WHERE pubDate > datetime('now', '-1 day')"
           ).all();
-          if( results.length === 0 ) return new Response("Failed to send mail", { status: 500 });
+          if (!results || !Array.isArray(results)) {
+            throw new Error("No results found or results is not an array");
+          }
           const updatedResult = await Promise.all(
             results.map(async (result) => {
               result.Content = await getAISummary(env, result.Content, 3);
+              return result;
             })
           );
           const emailHtml = generateEmail(updatedResult);
@@ -124,7 +127,7 @@ async function getAISummary(env, content, retries) {
   for (let i = 0; i < retries; i++) {
     try {
       const response = await env.AI.run("@cf/meta/llama-2-7b-chat-int8", {
-        prompt: `Write an elaborated and medium-sized summary for a newsletter based on the following news article content:\n\n${content}`,
+        prompt: `Write an elaborated and medium-sized summary for a newsletter based on the following news article content, don't add any heading or anything, just content is required:\n\n${content}`,
       });
       return response.response;
     } catch (error) {
