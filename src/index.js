@@ -37,6 +37,7 @@ export default {
           const { results } = await env.DB.prepare(
             "SELECT * FROM NewsCollection WHERE pubDate > datetime('now', '-1 day')"
           ).all();
+          if( results.length === 0 ) return new Response("Failed to send mail", { status: 500 });
           const updatedResult = await Promise.all(
             results.map(async (result) => {
               result.Content = await getAISummary(env, result.Content, 3);
@@ -64,14 +65,14 @@ export default {
     switch (event.cron) {
       case "30 5,11,17,23 * * *": // Runs at every 6 AM, 12 PM, 6 PM, 12 AM IST
         try {
-          ctx.waitUntil(await handleScheduledAction(env));
+          ctx.waitUntil(handleScheduledAction(env));
         } catch (error) {
           console.error("Scheduled action failed:", error);
         }
         break;
       case "30 18 */2 * *": // Runs at 12:00 AM IST, every 2 days
         try {
-          ctx.waitUntil(await handleScheduledDeletion(env));
+          ctx.waitUntil(handleScheduledDeletion(env));
         } catch (error) {
           console.error("Scheduled deletion failed:", error);
         }
