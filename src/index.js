@@ -127,7 +127,7 @@ async function getAISummary(env, content, retries) {
   for (let i = 0; i < retries; i++) {
     try {
       const response = await env.AI.run("@cf/meta/llama-2-7b-chat-int8", {
-        prompt: `Write an elaborated and medium-sized summary for a newsletter based on the following news article content, don't add any heading or anything, just content is required:\n\n${content}`,
+        prompt: `Write a medium-sized summary (upto 500 words) based on the following news article content, don't add any heading or anything, just content is required:\n\n${content}`,
       });
       return response.response;
     } catch (error) {
