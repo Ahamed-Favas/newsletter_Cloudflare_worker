@@ -36,7 +36,7 @@ export function generateEmail(feedsData) {
         <body style="margin: 0; padding: 0; font-family: 'GeistSans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; background: linear-gradient(120deg, #f6f9fc, #e9eef5);">
             <div style="max-width: 600px; margin: 20px auto; padding: 20px; background-color: #ffffff; border: 2px solid #dfe7ed; border-radius: 12px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
                 <div style="text-align: center; padding: 20px 0; border-bottom: 1px solid #e0e4e8;">
-                    <h1 style="font-size: 26px; color: #2c3e50; margin: 0; font-weight: 700;">Weekly Newsletter</h1>
+                    <h1 style="font-size: 26px; color: #2c3e50; margin: 0; font-weight: 700;">Daily Newsletter</h1>
                 </div>
                 <div style="padding: 20px 0;">
                     ${feedHTML}
