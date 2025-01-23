@@ -10,7 +10,8 @@ function sanitizeHtml(str) {
 
 function convertDateTime(str) {
     if (!str) return '';
-    return (new Date(str).toLocaleTimeString([], {
+    return (new Date(str).toLocaleTimeString('en-US', {
+        timeZone: 'Asia/Kolkata',
         weekday: "long",
         year: "numeric",
         month: "short",

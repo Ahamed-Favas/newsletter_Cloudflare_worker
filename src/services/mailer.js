@@ -26,13 +26,15 @@ export async function sendEmail(env, emailHtml, userEmail) {
     }
 }
 
-export function getTodayDate() {
-  const currDate = new Date()
-  return currDate.toLocaleDateString(
-    undefined, {
-      weekday: "long",
-      year: "numeric",
-      month: "short",
-      day: "numeric"
-    })
+function getTodayDate() {
+  const currDate = new Date();
+  const options = {
+    timeZone: "Asia/Kolkata",
+    weekday: "long",
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  };
+  // @ts-ignore
+  return currDate.toLocaleDateString("en-IN", options);
 }
