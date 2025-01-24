@@ -34,18 +34,33 @@ export default {
 
       if (userFeed === "timesofindia_topstories") {
         try {
-          const { results } = await env.DB.prepare(
+            const { results } = await env.DB.prepare(
             "SELECT * FROM NewsCollection WHERE pubDate > datetime('now', '-1 day')"
-          ).all();
+            ).all();
           if (!results || !Array.isArray(results)) {
             throw new Error("No results found or results is not an array");
           }
-          const updatedResult = await Promise.all(
-            results.map(async (result) => {
+            // First, ask AI to rank the headlines
+            const headlineRankingPrompt = results.map(r => r.Title).join('\n');
+            const rankingResponse = await env.AI.run("@cf/meta/llama-2-7b-chat-int8", {
+            prompt: `From the following news headlines, select up to 20 most important and impactful ones. Just return the line numbers (1-based) separated by commas:\n\n${headlineRankingPrompt}`,
+            });
+            
+            // Parse the response to get selected indices
+            const selectedIndices = rankingResponse.response
+            .split(',')
+            .map(n => parseInt(n.trim()) - 1)
+            .filter(n => !isNaN(n) && n >= 0 && n < results.length)
+            .slice(0, 20);
+            
+            // Generate summaries only for selected news and order by priority
+            const updatedResult = await Promise.all(
+              selectedIndices.map(async (index) => {
+              const result = results[index];
               result.Content = await getAISummary(env, result.Content, 3);
               return result;
-            })
-          );
+              })
+            );
           const emailHtml = generateEmail(updatedResult);
           const emailResponse = await sendEmail(env, emailHtml, userEmail);
           if (emailResponse && emailResponse.ok) {

@@ -1,14 +1,16 @@
 import { DOMParser } from 'xmldom';
 
 function parseDate(dateStr) {
-    if (!dateStr) return new Date();
+    const currDateTime = new Date().toISOString();
+    if (!dateStr) return currDateTime;
     try {
-        const date = new Date(dateStr);
-        return isNaN(date.getTime()) ? new Date() : date;
+        const dateTime = new Date(dateStr).toISOString();
+        return dateTime;
     } catch {
-        return new Date();
+        return currDateTime;
     }
 }
+
 async function getAllLinks(env) {
     const allLinks = []
     const { results } = (await env.DB.prepare("SELECT Link FROM NewsCollection").all());
@@ -74,7 +76,7 @@ export async function parseFeed(sources, env) {
                             category: category,
                             title: item.getElementsByTagName("title")[0]?.textContent || "No Title",
                             link: link,
-                            pubDate: parseDate(pubDateStr).toISOString(),
+                            pubDate: parseDate(pubDateStr),
                             id: item.getElementsByTagName("guid")[0]?.textContent,
                             description: item.getElementsByTagName("description")[0]?.textContent || "",
                             content: content
@@ -104,7 +106,7 @@ export async function parseFeed(sources, env) {
                             category: category,
                             title: entry.getElementsByTagName("title")[0]?.textContent || "No Title",
                             link: link,
-                            pubDate: parseDate(pubDateStr).toISOString(),
+                            pubDate: parseDate(pubDateStr),
                             id: entry.getElementsByTagName("id")[0]?.textContent,
                             description: entry.getElementsByTagName("content")[0]?.textContent || "",
                             content: content
