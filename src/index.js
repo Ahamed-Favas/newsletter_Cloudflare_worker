@@ -2,82 +2,9 @@ import { sendEmail } from "./services/mailer";
 import { parseFeed } from "./actions/parseRss";
 import { sources } from "./feeds/sources";
 import { generateEmail } from "./template/template";
+import { getUsersMails } from "./actions/getUsers";
 
 export default {
-  async fetch(request, env, ctx) {
-    if (request.method === "POST") {
-      const validUsername = env.HttpUsername;
-      const validPassword = env.HttpPassword;
-
-      const authHeader = request.headers.get("authorization");
-      if (!authHeader || !authHeader.startsWith("Basic ")) {
-        return new Response("Unauthorized", {
-          status: 401,
-          headers: { "WWW-Authenticate": "Basic" },
-        });
-      }
-
-      const encodedCredentials = authHeader.replace("Basic ", "");
-      const decodedCredentials = atob(encodedCredentials);
-      const [username, password] = decodedCredentials.split(":");
-
-      if (username !== validUsername || password !== validPassword) {
-        return new Response("Forbidden", { status: 403 });
-      }
-
-      const body = await request.json();
-      const userEmail = body.user_email;
-      const userFeed = body.user_feed;
-      if (!userEmail || !userFeed) {
-        return new Response("Missing params in request body", { status: 400 });
-      }
-
-      if (userFeed === "timesofindia_topstories") {
-        try {
-            const { results } = await env.DB.prepare(
-            "SELECT * FROM NewsCollection WHERE pubDate > datetime('now', '-1 day')"
-            ).all();
-          if (!results || !Array.isArray(results)) {
-            throw new Error("No results found or results is not an array");
-          }
-            // First, ask AI to rank the headlines
-            const headlineRankingPrompt = results.map(r => r.Title).join('\n');
-            const rankingResponse = await env.AI.run("@cf/meta/llama-2-7b-chat-int8", {
-            prompt: `From the following news headlines, select up to 20 most important and impactful ones. Just return the line numbers (1-based) separated by commas:\n\n${headlineRankingPrompt}`,
-            });
-            
-            // Parse the response to get selected indices
-            const selectedIndices = rankingResponse.response
-            .split(',')
-            .map(n => parseInt(n.trim()) - 1)
-            .filter(n => !isNaN(n) && n >= 0 && n < results.length)
-            .slice(0, 20);
-            
-            // Generate summaries only for selected news and order by priority
-            const updatedResult = await Promise.all(
-              selectedIndices.map(async (index) => {
-              const result = results[index];
-              result.Content = await getAISummary(env, result.Content, 3);
-              return result;
-              })
-            );
-          const emailHtml = generateEmail(updatedResult);
-          const emailResponse = await sendEmail(env, emailHtml, userEmail);
-          if (emailResponse && emailResponse.ok) {
-            return new Response("Mail sent successfully", { status: 200 });
-          } else {
-            return new Response("Failed to send mail", { status: 500 });
-          }
-        } catch (error) {
-          console.error("Error occurred while processing results:", error);
-          return new Response("Internal Server Error", { status: 500 });
-        }
-      }
-      return new Response("user is validated");
-    }
-    return new Response("method is not allowed", { status: 405 });
-  },
-
   async scheduled(event, env, ctx) {
     console.log("Running scheduled task at:", event.cron);
     switch (event.cron) {
@@ -95,12 +22,19 @@ export default {
           console.error("Scheduled deletion failed:", error);
         }
         break;
+        case "30 1 * * *": // Runs at every 7 AM IST
+        try {
+          ctx.waitUntil(handleScheduledMailing(env));
+        } catch (error) {
+          console.error("Scheduled mailing failed:", error);
+        }
+        break;
     }
   },
 };
 
 async function handleScheduledAction(env) {
-  // do scheduled task, ie getting content in every 6 hr.
+  // getting content in every 6 hr.
   const feedContent = await parseFeed(sources, env);
   console.log("feedContent.length", feedContent.length);
   try {
@@ -128,6 +62,7 @@ async function handleScheduledAction(env) {
 }
 
 async function handleScheduledDeletion(env) {
+  // deleting old contents
   try {
     await env.DB.prepare(
       "DELETE FROM NewsCollection WHERE pubDate < datetime('now', '-2 day')"
@@ -138,11 +73,57 @@ async function handleScheduledDeletion(env) {
   }
 }
 
+async function handleScheduledMailing(env) {
+  // for scheduled mailing
+  const emails = await getUsersMails(env);
+  try {
+    // select news which are only upto 1 day older.
+    const { results } = await env.DB.prepare(
+            "SELECT * FROM NewsCollection WHERE pubDate > datetime('now', '-1 day')"
+          ).all();
+
+    if (!results || !Array.isArray(results)) {
+            throw new Error("No results found or results is not an array");
+          }
+    // asking ai to select top news
+    const newsHeadlines = results.map(r => r.Title).join('\n');
+    const rankingResponse = await env.AI.run("@cf/meta/llama-2-7b-chat-int8", {
+            prompt: `From the following news headlines, select up to 10 most important and impactful ones. Just return the line numbers (1-based) separated by commas:\n\n${newsHeadlines}`,
+            });
+    const selectedIndices = rankingResponse.response
+            .split(',')
+            .map(n => parseInt(n.trim()) - 1)
+            .filter(n => !isNaN(n) && n >= 0 && n < results.length)
+            .slice(0, 10);
+    // Generate summaries only for selected news and order by priority
+    const updatedResult = await Promise.all(
+              selectedIndices.map(async (index) => {
+              const result = results[index];
+              result.Content = await getAISummary(env, result.Content, 3);
+              return result;
+              })
+            );
+    
+      const emailHtml = generateEmail(updatedResult);
+      const emailResponse = await sendEmail(env, emailHtml, emails);
+
+      if (emailResponse && emailResponse.ok) {
+        return new Response("Mail sent successfully", { status: 200 });
+      } else {
+        return new Response("Failed to send mail", { status: 500 });
+      }
+
+  } catch (error) {
+      console.error("Error occurred while processing results:", error);
+      return new Response("Internal Server Error", { status: 500 });
+  }
+}
+
 async function getAISummary(env, content, retries) {
   for (let i = 0; i < retries; i++) {
     try {
       const response = await env.AI.run("@cf/meta/llama-2-7b-chat-int8", {
-        prompt: `Write a medium-sized summary (upto 500 words) based on the following news article content, don't add any heading or anything, just content is required:\n\n${content}`,
+        prompt: `Write a short comprehensive summary based on the following news article content, don't add any heading or anything, just content is required:\n\n${content}`,
       });
       return response.response;
     } catch (error) {

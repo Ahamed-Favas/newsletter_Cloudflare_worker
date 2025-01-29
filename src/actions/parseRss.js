@@ -12,6 +12,7 @@ function parseDate(dateStr) {
 }
 
 async function getAllLinks(env) {
+    // Gets article links which scraped so far
     const allLinks = []
     const { results } = (await env.DB.prepare("SELECT Link FROM NewsCollection").all());
     results.forEach(row => allLinks.push(row.Link));
@@ -19,10 +20,10 @@ async function getAllLinks(env) {
 }
 
 async function fetchUrl(url, env, isXml) {
-    if (!isXml) {
+    if (!isXml) { 
         const allLinks = await getAllLinks(env);
         if (allLinks.includes(url)) { 
-            return
+            return  // To avoid scraping duplicate articles
         } 
     }
     // console.log("called for url", url)
