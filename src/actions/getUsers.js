@@ -29,7 +29,7 @@ export async function getUsersMails(env) {
     const apiUrl = env.VERCEL_API;
     try {
         const { users } = await fetchApi(apiUrl, secret);
-        const emails = users.map(user => {users.email});
+        const emails = users.map(user => user.email);
         return emails
     } catch (error) {
         throw new Error(`Failed while getting API getting emails: ${error}`);

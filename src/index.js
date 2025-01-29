@@ -22,7 +22,7 @@ export default {
           console.error("Scheduled deletion failed:", error);
         }
         break;
-        case "30 1 * * *": // Runs at every 7 AM IST
+      case "30 1 * * *": // Runs at every 7 AM IST
         try {
           ctx.waitUntil(handleScheduledMailing(env));
         } catch (error) {
