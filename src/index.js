@@ -56,9 +56,10 @@ async function handleScheduledAction(env) {
     }
   } catch (error) {
     console.error("Error occurred while adding to db", error);
-    return new Response("Some records failed to insert", { status: 500 });
+    return;
   }
-  return new Response("All records inserted successfully", { status: 200 });
+  console.log("feeds inserted to db successfully")
+  return
 }
 
 async function handleScheduledDeletion(env) {
@@ -108,14 +109,16 @@ async function handleScheduledMailing(env) {
       const emailResponse = await sendEmail(env, emailHtml, emails);
 
       if (emailResponse && emailResponse.ok) {
-        return new Response("Mail sent successfully", { status: 200 });
+        console.log("Mail sent successfully")
+        return
       } else {
-        return new Response("Failed to send mail", { status: 500 });
+        console.error("Failed to send mail")
+        return
       }
 
   } catch (error) {
-      console.error("Error occurred while processing results:", error);
-      return new Response("Internal Server Error", { status: 500 });
+      console.error("Internal Server Error", error);
+      return
   }
 }
 
