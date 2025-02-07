@@ -1,15 +1,19 @@
-export async function sendEmail(env, emailHtml, emails) {
+export async function sendEmail(env, emailHtml, userEmail) {
     try {
       const today = getTodayDate()
-      const response = await fetch(`https://api.mailgun.net/v3/${env.mailGunDomain}/messages`, {
+      const domain = env.mailGunDomain;
+      const apiKey = env.mailGunAPIKEY;
+      const mailFrom = env.mailGunFromAddress;
+
+      const response = await fetch(`https://api.mailgun.net/v3/${domain}/messages`, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          "Authorization": `Basic ${btoa(`api:${env.mailGunAPIKEY}`)}`
+          "Authorization": `Basic ${btoa(`api:${apiKey}`)}`
         },
         body: new URLSearchParams({
-          from: env.mailGunFromAddress,
-          to: emails,
+          from: mailFrom,
+          to: userEmail,
           subject: `Good Morning! Today is ${today}`,
           html: emailHtml,
         })

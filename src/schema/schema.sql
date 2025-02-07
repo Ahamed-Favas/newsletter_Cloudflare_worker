@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS NewsCollection (
     Category VARCHAR(255),
     Title VARCHAR(2083),
     Link VARCHAR(2083),
-    pubDate DATETIME,
+    pubDate VARCHAR(255),
     Id VARCHAR(2083),
     Description TEXT,
     Content TEXT

@@ -24,13 +24,12 @@ async function fetchApi(url, secret) {
     return await response.json()
 }
 
-export async function getUsersMails(env) {
+export async function getUsers(env) {
     const secret = new TextEncoder().encode(env.JWT_SECRET);
     const apiUrl = env.VERCEL_API;
     try {
         const { users } = await fetchApi(apiUrl, secret);
-        const emails = users.map(user => user.email);
-        return emails
+        return users
     } catch (error) {
         throw new Error(`Failed while getting API getting emails: ${error}`);
     }

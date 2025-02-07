@@ -1,37 +1,32 @@
 import { sendEmail } from "./services/mailer";
 import { parseFeed } from "./actions/parseRss";
-import { sources } from "./feeds/sources";
+import { sources } from "./sources/sources";
 import { generateEmail } from "./template/template";
-import { getUsersMails } from "./actions/getUsers";
+import { getUsers } from "./actions/getUsers";
+
 
 export default {
   async scheduled(event, env, ctx) {
     console.log("Running scheduled task at:", event.cron);
     switch (event.cron) {
-      case "30 0,6,12,18 * * *": // Runs at every 6 AM, 12 PM, 6 PM, 12 AM IST
-        try {
-          ctx.waitUntil(handleScheduledAction(env));
-        } catch (error) {
+      case "*/5 * * * *": // Runs at every 4 hours daily, 05:30, 09:30, 13:30 17:30, 21:30, 01:30 IST
+        ctx.waitUntil(handleScheduledAction(env).catch(error => {
           console.error("Scheduled action failed:", error);
-        }
+        }));
         break;
-      case "30 18 */2 * *": // Runs at 12:00 AM IST, every 2 days
-        try {
-          ctx.waitUntil(handleScheduledDeletion(env));
-        } catch (error) {
+      case "30 18 */4 * *": // Runs at 12:00 AM IST, every 4 days
+        ctx.waitUntil(handleScheduledDeletion(env).catch(error => {
           console.error("Scheduled deletion failed:", error);
-        }
+        }));
         break;
       case "30 1 * * *": // Runs at every 7 AM IST
-        try {
-          ctx.waitUntil(handleScheduledMailing(env));
-        } catch (error) {
+        ctx.waitUntil(handleScheduledMailing(env).catch(error => {
           console.error("Scheduled mailing failed:", error);
-        }
-        break;
+        }));
     }
   },
 };
+
 
 async function handleScheduledAction(env) {
   // getting content in every 6 hr.
@@ -40,7 +35,7 @@ async function handleScheduledAction(env) {
   try {
     for (const item of feedContent) {
       await env.DB.prepare(
-        "INSERT INTO NewsCollection (Feed, Category, Title, Link, pubDate, Id, Description, Content) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO NewsCollection (Feed, Category, Title, Link, pubDate, Id, Description, ImageUrl, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
       )
         .bind(
           item.feed,
@@ -50,7 +45,8 @@ async function handleScheduledAction(env) {
           item.pubDate,
           item.id,
           item.description,
-          item.content
+          item.imageUrl,
+          item.createdAt
         )
         .run();
     }
@@ -62,11 +58,12 @@ async function handleScheduledAction(env) {
   return
 }
 
+
 async function handleScheduledDeletion(env) {
   // deleting old contents
   try {
     await env.DB.prepare(
-      "DELETE FROM NewsCollection WHERE pubDate < datetime('now', '-2 day')"
+      "DELETE FROM NewsCollection WHERE createdAt < datetime('now', '-2 day')"
     ).run();
     console.log("Old records deleted successfully");
   } catch (error) {
@@ -74,9 +71,10 @@ async function handleScheduledDeletion(env) {
   }
 }
 
+
 async function handleScheduledMailing(env) {
   // for scheduled mailing
-  const emails = await getUsersMails(env);
+  const users = await getUsers(env);
   try {
     // select news which are only upto 1 day older.
     const { results } = await env.DB.prepare(
@@ -85,56 +83,69 @@ async function handleScheduledMailing(env) {
 
     if (!results || !Array.isArray(results)) {
             throw new Error("No results found or results is not an array");
-          }
-    // asking ai to select top news
-    const newsHeadlines = results.map(r => r.Title).join('\n');
-    const rankingResponse = await env.AI.run("@cf/meta/llama-2-7b-chat-int8", {
-            prompt: `From the following news headlines, select up to 10 most important and impactful ones. Just return the line numbers (1-based) separated by commas:\n\n${newsHeadlines}`,
-            });
-    const selectedIndices = rankingResponse.response
-            .split(',')
-            .map(n => parseInt(n.trim()) - 1)
-            .filter(n => !isNaN(n) && n >= 0 && n < results.length)
-            .slice(0, 10);
-    // Generate summaries only for selected news and order by priority
-    const updatedResult = await Promise.all(
-              selectedIndices.map(async (index) => {
-              const result = results[index];
-              result.Content = await getAISummary(env, result.Content, 3);
-              return result;
-              })
-            );
-    
-      const emailHtml = generateEmail(updatedResult);
-      const emailResponse = await sendEmail(env, emailHtml, emails);
-
-      if (emailResponse && emailResponse.ok) {
-        console.log("Mail sent successfully")
-        return
-      } else {
-        console.error("Failed to send mail")
-        return
       }
+    //  sorting news based on their feed value
+    const newsGrouped = {};
+    results.forEach(news => {
+      const categoryValue = news.category;
+      if (!newsGrouped[categoryValue]) {
+        newsGrouped[categoryValue] = []
+      }
+      newsGrouped[categoryValue].push(news)
+    })
 
+    const topNews = {};
+    for (const category of Object.keys(newsGrouped)) {
+
+      const newsList = newsGrouped[category];
+      const newsHeadlines = newsList.map(n => n.Title).join('\n');
+      // Asking AI to select top news headlines
+      const rankingResponse = await env.AI.run("@cf/meta/llama-2-7b-chat-int8", {
+        prompt: `From the following news headlines, select up to 10 most important and impactful ones. Just return the line numbers (1-based) separated by commas:\n\n${newsHeadlines}`,
+      });
+      // Parse indices 
+      let selectedIndices = []
+      try {
+        selectedIndices = rankingResponse.response
+        .split(',')
+        .map(n => parseInt(n.trim()) - 1)
+        .filter(n => !isNaN(n) && n >= 0 && n < newsList.length)
+        .slice(0, 10);
+        } catch (error) {
+          console.warn("failed to parse ai indeces")
+          selectedIndices = newsList.slice(0, 10) // adjusting with available data
+        }
+      
+      // Order results based on indices
+      const selectedNews = selectedIndices.map(index => newsList[index]);
+      topNews[category] = selectedNews;
+    }
+    // console.log(topNews);
+    // generate emailhtml and send for each user
+    for (const user of users){
+      const userEmail = user.email;
+      const userPrefers = Object.keys(user.preferences).filter(key => user.preferences[key]);
+      const userSources = Object.keys(user.sources).filter(key => user.sources[key]);
+
+      if ( userSources.includes("Times of India") ) {    //   a s    o f    n o w
+        const selectedFeeds = []
+        userPrefers.map(pref => {
+          if (Object.keys(topNews).includes(pref)) {
+            selectedFeeds.push(...topNews[pref])
+          }
+        });
+        const emailHtml = generateEmail(selectedFeeds);
+        const emailResponse = await sendEmail(env, emailHtml, userEmail)
+
+        if (emailResponse && emailResponse.ok) {
+          console.log("Mail sent successfully")
+        } else {
+          console.error("Failed to send mail")
+        }
+      }
+    }
   } catch (error) {
       console.error("Internal Server Error", error);
       return
-  }
-}
-
-async function getAISummary(env, content, retries) {
-  for (let i = 0; i < retries; i++) {
-    try {
-      const response = await env.AI.run("@cf/meta/llama-2-7b-chat-int8", {
-        prompt: `Write a short comprehensive summary based on the following news article content, don't add any heading or anything, just content is required:\n\n${content}`,
-      });
-      return response.response;
-    } catch (error) {
-      console.error(`Attempt ${i + 1} failed:`, error);
-      if (i === retries - 1) throw error;
-      await new Promise((resolve) =>
-        setTimeout(resolve, 1000 * (i + 1))
-      ); // Exponential backoff
-    }
   }
 }
