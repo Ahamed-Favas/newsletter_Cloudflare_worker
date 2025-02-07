@@ -21,43 +21,247 @@ function convertDateTime(str) {
     }));
 }
 
-export function generateEmail(feedsData) {
+export function generateEmail(feedsData, unsubUrl) {
     const feedHTML = feedsData.map(feed => `
-        <article style="margin-bottom: 30px; padding: 20px; background-color: #fff; border: 1px solid #e0e4e8; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); transition: transform 0.2s ease, box-shadow 0.2s ease;">
-            <span style="display: inline-block; padding: 4px 10px; background-color: #e8f4fc; color: #3498db; border-radius: 12px; font-size: 12px; font-weight: bold; margin-bottom: 10px;">
-                ${sanitizeHtml(feed.Category.trim())}
-            </span>
-            <h2 style="font-size: 20px; color: #2c3e50; margin: 0 0 10px 0; font-weight: 700;">
-                ${sanitizeHtml(feed.Title.trim())}
-            </h2>
-            <div style="font-size: 14px; color: #666; margin-bottom: 15px;">
-                ${sanitizeHtml(convertDateTime(feed.pubDate.trim()))}
-            </div>
-            <p style="color: #5a7997; margin-bottom: 15px; font-size: 16px;">
-                ${sanitizeHtml(feed.Content.trim())}
-            </p>
-            ${feed.Link ? `<a href="${sanitizeHtml(feed.Link)}" style="display: inline-block; padding: 8px 20px; background-color: #3498db; color: #ffffff; text-decoration: none; border-radius: 4px; font-size: 14px; font-weight: bold; transition: background-color 0.3s ease;">Read Original Article</a>` : ''}
-        </article>
-    `).join('');
-    return `
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Newsletter</title>
-        </head>
-        <body style="margin: 0; padding: 0; font-family: 'GeistSans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; background: linear-gradient(120deg, #f6f9fc, #e9eef5);">
-            <div style="max-width: 600px; margin: 20px auto; padding: 20px; background-color: #ffffff; border: 2px solid #dfe7ed; border-radius: 12px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-                <div style="text-align: center; padding: 20px 0; border-bottom: 1px solid #e0e4e8;">
-                    <h1 style="font-size: 26px; color: #2c3e50; margin: 0; font-weight: 700;">Daily Newsletter</h1>
-                </div>
-                <div style="padding: 20px 0;">
-                    ${feedHTML}
-                </div>
-                <div style="text-align: center; padding: 20px; color: #666; font-size: 12px; border-top: 1px solid #e0e4e8;">
-                    <p>You're receiving this email because you subscribed to newsletter@pastpricing.com.</p>
-                </div>
-            </div>
-        </body>
-        </html>`;
+        
+        <!--[if mso | IE]>
+         <table align="center" border="0" cellpadding="0" cellspacing="0" class="" role="presentation" style="width:600px;" width="600" >
+            <tr>
+               <td style="line-height:0px;font-size:0px;mso-line-height-rule:exactly;">
+                  <![endif]-->
+                  <div style="margin:0px auto;max-width:600px;">
+                     <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">
+                        <tbody>
+                           <tr>
+                              <td style="direction:ltr;font-size:0px;padding:8px 0;text-align:center;">
+                                 <!--[if mso | IE]>
+                                 <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                       <td class="" style="vertical-align:top;width:600px;" >
+                                          <![endif]-->
+                                          <div class="mj-column-per-100 mj-outlook-group-fix" style="font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;">
+                                             <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                                                <tbody>
+                                                   <tr>
+                                                      <td style="background-color:#FFFFFE;vertical-align:top;padding:0;">
+                                                         <table border="0" cellpadding="0" cellspacing="0" role="presentation" style width="100%">
+                                                            <tbody>
+                                                               <!-- Category -->
+                                                               <tr>
+                                                                  <td align="center" class="category-text" style="display: inline-block; border-radius: 8px; margin-top: 6px; margin-left: 6px; background-color: #e8f4fc; color: #3498db; text-align: center; font-size: 0px; padding: 4px 4px; word-break: break-word;" bgcolor="#e8f4fc">
+                                                                     <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:13px;line-height:1;text-align:center;color:#000000;">${sanitizeHtml(feed.Category.trim())}</div>
+                                                                  </td>
+                                                               </tr>
+                                                               <!-- Title -->
+                                                               <tr>
+                                                                  <td align="center" style="font-size:0px;padding:2px 0;word-break:break-word;">
+                                                                     <div style="font-family:Helvetica, Arial, sans-serif;font-size:20px;font-weight:bold;line-height:1;text-align:center;color:#000000;">${sanitizeHtml(feed.Title.trim())}</div>
+                                                                  </td>
+                                                               </tr>
+                                                               <!-- Date -->
+                                                               <tr>
+                                                                  <td align="center" style="font-size:0px;padding:2px 0;word-break:break-word;">
+                                                                     <div style="font-family:Helvetica, Arial, sans-serif;font-size:12px;line-height:1;text-align:center;color:#999999;">${sanitizeHtml(convertDateTime(feed.pubDate.trim()))}</div>
+                                                                  </td>
+                                                               </tr>
+                                                               <!-- Image -->
+                                                               <tr>
+                                                                  <td align="center" class="news-image" style="font-size:0px;padding:0;word-break:break-word;">
+                                                                     <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:collapse;border-spacing:0px;">
+                                                                        <tbody>
+                                                                           <tr>
+                                                                              <td style="width:600px;">
+                                                                                 <img alt="news image" height="auto" src=${feed.imageUrl.trim()} style="max-height: 300px; object-fit: contain; box-shadow: 0px 2px 6px rgba(0,0,0,0.15); border: 0; display: block; outline: none; text-decoration: none; font-size: 13px; width: 100%; height: auto;" width="600">
+                                                                              </td>
+                                                                           </tr>
+                                                                        </tbody>
+                                                                     </table>
+                                                                  </td>
+                                                               </tr>
+                                                               <!-- Summary -->
+                                                               <tr>
+                                                                  <td align="left" style="font-size:0px;padding:6px 6px;word-break:break-word;">
+                                                                     <div style="font-family:Helvetica, Arial, sans-serif;font-size:14px;line-height:120%;text-align:left;color:#000000;">${sanitizeHtml(feed.description.trim())}</div>
+                                                                  </td>
+                                                               </tr>
+                                                               <!-- Read More Link -->
+                                                               <tr>
+                                                                  <td align="left" class="read-more" style="font-size:0px;padding:6px 6px;word-break:break-word;">
+                                                                     <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:13px;line-height:1;text-align:left;color:#000000;"><a href=${feed.Link.trim()} style="text-decoration: underline; color: #3498db;">Read more...</a></div>
+                                                                  </td>
+                                                               </tr>
+                                                            </tbody>
+                                                         </table>
+                                                      </td>
+                                                   </tr>
+                                                </tbody>
+                                             </table>
+                                          </div>
+                                          <!--[if mso | IE]>
+                                       </td>
+                                    </tr>
+                                 </table>
+                                 <![endif]-->
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  <!--[if mso | IE]>
+               </td>
+            </tr>
+         </table>
+         <![endif]-->
+
+        `).join('');
+
+     return `
+    <!doctype html>
+    <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+    <head>
+        <title>
+        </title>
+        <!--[if !mso]><!-->
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <!--<![endif]-->
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style type="text/css">
+            #outlook a { padding:0; }
+            body { margin:0;padding:0;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%; }
+            table, td { border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt; }
+            img { border:0;height:auto;line-height:100%; outline:none;text-decoration:none;-ms-interpolation-mode:bicubic; }
+            p { display:block;margin:13px 0; }
+        </style>
+        <!--[if mso]>
+        <noscript>
+            <xml>
+                <o:OfficeDocumentSettings>
+                <o:AllowPNG/>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+                </o:OfficeDocumentSettings>
+            </xml>
+        </noscript>
+        <![endif]-->
+        <!--[if lte mso 11]>
+        <style type="text/css">
+            .mj-outlook-group-fix { width:100% !important; }
+        </style>
+        <![endif]-->
+        <!--[if !mso]><!-->
+        <link href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700" rel="stylesheet" type="text/css">
+        <style type="text/css">
+            @import url(https://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700);
+        </style>
+        <!--<![endif]-->
+        <style type="text/css">
+            @media only screen and (min-width:480px) {
+            .mj-column-per-100 { width:100% !important; max-width: 100%; }
+            }
+        </style>
+        <style media="screen and (min-width:480px)">
+            .moz-text-html .mj-column-per-100 { width:100% !important; max-width: 100%; }
+        </style>
+        <style type="text/css">
+            @media only screen and (max-width:480px) {
+            table.mj-full-width-mobile { width: 100% !important; }
+            td.mj-full-width-mobile { width: auto !important; }
+            }
+        </style>
+        <style type="text/css">
+        </style>
+    </head>
+    <body style="word-spacing:normal;background-color:#F2F2F2;">
+        <div style="background-color:#F2F2F2;">
+            <!-- Header -->
+            <!--[if mso | IE]>
+            <table align="center" border="0" cellpadding="0" cellspacing="0" class="" role="presentation" style="width:600px;" width="600" >
+                <tr>
+                <td style="line-height:0px;font-size:0px;mso-line-height-rule:exactly;">
+                    <![endif]-->
+                    <div style="margin:0px auto;max-width:600px;">
+                        <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">
+                            <tbody>
+                            <tr>
+                                <td style="direction:ltr;font-size:0px;padding:10px 0;text-align:center;">
+                                    <!--[if mso | IE]>
+                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                        <td class="" style="vertical-align:top;width:600px;" >
+                                            <![endif]-->
+                                            <div class="mj-column-per-100 mj-outlook-group-fix" style="font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;">
+                                                <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="vertical-align:top;" width="100%">
+                                                    <tbody>
+                                                    <tr>
+                                                        <td align="center" style="font-size:0px;padding:10;word-break:break-word;">
+                                                            <div style="font-family:Helvetica, Arial, sans-serif;font-size:24px;line-height:120%;text-align:center;color:#000000;"><strong>Daily Newsletter</strong></div>
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <!--[if mso | IE]>
+                                        </td>
+                                        </tr>
+                                    </table>
+                                    <![endif]-->
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--[if mso | IE]>
+                </td>
+                </tr>
+            </table>
+            <![endif]-->
+            <!-- News Sections  -->
+                ${feedHTML}
+            <!-- Footer / Unsubscribe -->
+            <!--[if mso | IE]>
+            <table align="center" border="0" cellpadding="0" cellspacing="0" class="" role="presentation" style="width:600px;" width="600" >
+                <tr>
+                <td style="line-height:0px;font-size:0px;mso-line-height-rule:exactly;">
+                    <![endif]-->
+                    <div style="margin:0px auto;max-width:600px;">
+                        <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">
+                            <tbody>
+                            <tr>
+                                <td style="direction:ltr;font-size:0px;padding:10px 0;text-align:center;">
+                                    <!--[if mso | IE]>
+                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                        <td class="" style="vertical-align:top;width:600px;" >
+                                            <![endif]-->
+                                            <div class="mj-column-per-100 mj-outlook-group-fix" style="font-size:0px;text-align:left;direction:ltr;display:inline-block;vertical-align:top;width:100%;">
+                                                <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="vertical-align:top;" width="100%">
+                                                    <tbody>
+                                                    <tr>
+                                                        <td align="center" style="font-size:0px;padding:0;word-break:break-word;">
+                                                            <div style="font-family:Helvetica, Arial, sans-serif;font-size:14px;line-height:20px;text-align:center;color:#000000;">You're receiving this email because you subscribed to our newsletter at <strong>newsletter@pastpricing.com</strong>. If you'd like to unsubscribe, <a href=${unsubUrl.trim()} style="text-decoration:none; color:#0000EE;">Click here</a>.</div>
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <!--[if mso | IE]>
+                                        </td>
+                                        </tr>
+                                    </table>
+                                    <![endif]-->
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--[if mso | IE]>
+                </td>
+                </tr>
+            </table>
+            <![endif]-->
+        </div>
+    </body>
+    </html>
+
+    `
 }

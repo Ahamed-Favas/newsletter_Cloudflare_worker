@@ -1,15 +1,15 @@
 import { sendEmail } from "./services/mailer";
 import { parseFeed } from "./actions/parseRss";
 import { sources } from "./sources/sources";
-import { generateEmail } from "./template/template";
 import { getUsers } from "./actions/getUsers";
+import { generateEmail } from "./template/template";
 
 
 export default {
   async scheduled(event, env, ctx) {
     console.log("Running scheduled task at:", event.cron);
     switch (event.cron) {
-      case "*/5 * * * *": // Runs at every 4 hours daily, 05:30, 09:30, 13:30 17:30, 21:30, 01:30 IST
+      case "0 */4 * * *": // Runs at every 4 hours daily, 05:30, 09:30, 13:30 17:30, 21:30, 01:30 IST
         ctx.waitUntil(handleScheduledAction(env).catch(error => {
           console.error("Scheduled action failed:", error);
         }));
@@ -124,6 +124,8 @@ async function handleScheduledMailing(env) {
     // generate emailhtml and send for each user
     for (const user of users){
       const userEmail = user.email;
+      const unsubscribeToken = user.unsubToken;
+      const unsubUrl = `https://nhttps://newsletter.pastpricing.com/api/mongo/${unsubscribeToken}`
       const userPrefers = Object.keys(user.preferences).filter(key => user.preferences[key]);
       const userSources = Object.keys(user.sources).filter(key => user.sources[key]);
 
@@ -134,7 +136,7 @@ async function handleScheduledMailing(env) {
             selectedFeeds.push(...topNews[pref])
           }
         });
-        const emailHtml = generateEmail(selectedFeeds);
+        const emailHtml = generateEmail(selectedFeeds, unsubUrl);
         const emailResponse = await sendEmail(env, emailHtml, userEmail)
 
         if (emailResponse && emailResponse.ok) {
