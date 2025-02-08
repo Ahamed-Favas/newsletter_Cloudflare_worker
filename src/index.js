@@ -121,6 +121,8 @@ async function handleScheduledMailing(env) {
       topNews[category] = selectedNews;
     }
     // console.log(topNews);
+
+    // to do : generate summary for null description / img description
     // generate emailhtml and send for each user
     for (const user of users){
       const userEmail = user.email;

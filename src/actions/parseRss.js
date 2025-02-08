@@ -65,8 +65,7 @@ async function processSource(source, env) {
                 const link = item.getElementsByTagName("link")[0]?.textContent;
                 if (!link) return null;
                 
-                const description = item.getElementsByTagName("description")[0]?.textContent || item.getElementsByTagName("summary")[0]?.textContent;
-                if (!description) return null
+                const description = item.getElementsByTagName("description")[0]?.textContent || item.getElementsByTagName("summary")[0]?.textContent || null;
 
                 const enclosure = item.getElementsByTagName("enclosure")[0];
                 let imageUrl = enclosure && enclosure.getAttribute("type")?.startsWith("image/") ?
@@ -95,8 +94,7 @@ async function processSource(source, env) {
                 const pubDateStr = item.getElementsByTagName("published")[0]?.textContent || 
                                 item.getElementsByTagName("updated")[0]?.textContent;
                 
-                const description = item.getElementsByTagName("content")[0]?.textContent
-                if (!description) return null
+                const description = item.getElementsByTagName("content")[0]?.textContent || null
                 
                 const enclosureLink = links.find(link => 
                     link.getAttribute("rel") === "enclosure" && 
