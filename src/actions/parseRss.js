@@ -78,7 +78,7 @@ async function processSource(source, env) {
                     title: item.getElementsByTagName("title")[0]?.textContent || "",
                     link: link,
                     pubDate: parseDate(pubDateStr),
-                    id: item.getElementsByTagName("guid")[0]?.textContent,
+                    id: item.getElementsByTagName("guid")[0]?.textContent || "",
                     description: description,
                     imageUrl: imageUrl,
                     createdAt: new Date().toISOString()     
@@ -110,7 +110,7 @@ async function processSource(source, env) {
                     title: item.getElementsByTagName("title")[0]?.textContent || "",
                     link: item.getElementsByTagName("link")[0]?.getAttribute("href"),
                     pubDate: parseDate(pubDateStr),
-                    id: item.getElementsByTagName("id")[0]?.textContent,
+                    id: item.getElementsByTagName("id")[0]?.textContent || "",
                     description: description,
                     imageUrl: imageUrl,
                     createdAt: new Date().toISOString()

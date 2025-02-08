@@ -49,19 +49,19 @@ export function generateEmail(feedsData, unsubUrl) {
                                                                <!-- Category -->
                                                                <tr>
                                                                   <td align="center" class="category-text" style="display: inline-block; border-radius: 8px; margin-top: 6px; margin-left: 6px; background-color: #e8f4fc; color: #3498db; text-align: center; font-size: 0px; padding: 4px 4px; word-break: break-word;" bgcolor="#e8f4fc">
-                                                                     <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:13px;line-height:1;text-align:center;color:#000000;">${sanitizeHtml(feed.Category.trim())}</div>
+                                                                     <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:13px;line-height:1;text-align:center;color:#000000;">${sanitizeHtml(feed?.Category?.trim())}</div>
                                                                   </td>
                                                                </tr>
                                                                <!-- Title -->
                                                                <tr>
                                                                   <td align="center" style="font-size:0px;padding:2px 0;word-break:break-word;">
-                                                                     <div style="font-family:Helvetica, Arial, sans-serif;font-size:20px;font-weight:bold;line-height:1;text-align:center;color:#000000;">${sanitizeHtml(feed.Title.trim())}</div>
+                                                                     <div style="font-family:Helvetica, Arial, sans-serif;font-size:20px;font-weight:bold;line-height:1;text-align:center;color:#000000;">${sanitizeHtml(feed?.Title?.trim())}</div>
                                                                   </td>
                                                                </tr>
                                                                <!-- Date -->
                                                                <tr>
                                                                   <td align="center" style="font-size:0px;padding:2px 0;word-break:break-word;">
-                                                                     <div style="font-family:Helvetica, Arial, sans-serif;font-size:12px;line-height:1;text-align:center;color:#999999;">${sanitizeHtml(convertDateTime(feed.pubDate.trim()))}</div>
+                                                                     <div style="font-family:Helvetica, Arial, sans-serif;font-size:12px;line-height:1;text-align:center;color:#999999;">${sanitizeHtml(convertDateTime(feed?.pubDate?.trim()))}</div>
                                                                   </td>
                                                                </tr>
                                                                <!-- Image -->
@@ -71,7 +71,7 @@ export function generateEmail(feedsData, unsubUrl) {
                                                                         <tbody>
                                                                            <tr>
                                                                               <td style="width:600px;">
-                                                                                 <img alt="news image" height="auto" src=${feed.imageUrl.trim()} style="max-height: 300px; object-fit: contain; box-shadow: 0px 2px 6px rgba(0,0,0,0.15); border: 0; display: block; outline: none; text-decoration: none; font-size: 13px; width: 100%; height: auto;" width="600">
+                                                                                 <img alt="news image" height="auto" src=${feed?.imageUrl?.trim()} style="max-height: 300px; object-fit: contain; box-shadow: 0px 2px 6px rgba(0,0,0,0.15); border: 0; display: block; outline: none; text-decoration: none; font-size: 13px; width: 100%; height: auto;" width="600">
                                                                               </td>
                                                                            </tr>
                                                                         </tbody>
@@ -81,13 +81,13 @@ export function generateEmail(feedsData, unsubUrl) {
                                                                <!-- Summary -->
                                                                <tr>
                                                                   <td align="left" style="font-size:0px;padding:6px 6px;word-break:break-word;">
-                                                                     <div style="font-family:Helvetica, Arial, sans-serif;font-size:14px;line-height:120%;text-align:left;color:#000000;">${sanitizeHtml(feed.description.trim())}</div>
+                                                                     <div style="font-family:Helvetica, Arial, sans-serif;font-size:14px;line-height:120%;text-align:left;color:#000000;">${sanitizeHtml(feed?.description?.trim())}</div>
                                                                   </td>
                                                                </tr>
                                                                <!-- Read More Link -->
                                                                <tr>
                                                                   <td align="left" class="read-more" style="font-size:0px;padding:6px 6px;word-break:break-word;">
-                                                                     <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:13px;line-height:1;text-align:left;color:#000000;"><a href=${feed.Link.trim()} style="text-decoration: underline; color: #3498db;">Read more...</a></div>
+                                                                     <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:13px;line-height:1;text-align:left;color:#000000;"><a href=${feed?.Link?.trim()} style="text-decoration: underline; color: #3498db;">Read more...</a></div>
                                                                   </td>
                                                                </tr>
                                                             </tbody>
@@ -238,7 +238,7 @@ export function generateEmail(feedsData, unsubUrl) {
                                                     <tbody>
                                                     <tr>
                                                         <td align="center" style="font-size:0px;padding:0;word-break:break-word;">
-                                                            <div style="font-family:Helvetica, Arial, sans-serif;font-size:14px;line-height:20px;text-align:center;color:#000000;">You're receiving this email because you subscribed to our newsletter at <strong>newsletter@pastpricing.com</strong>. If you'd like to unsubscribe, <a href=${unsubUrl.trim()} style="text-decoration:none; color:#0000EE;">Click here</a>.</div>
+                                                            <div style="font-family:Helvetica, Arial, sans-serif;font-size:14px;line-height:20px;text-align:center;color:#000000;">You're receiving this email because you subscribed to our newsletter at <strong>newsletter@pastpricing.com</strong>. If you'd like to unsubscribe, <a href=${unsubUrl?.trim()} style="text-decoration:none; color:#0000EE;">Click here</a>.</div>
                                                         </td>
                                                     </tr>
                                                     </tbody>
