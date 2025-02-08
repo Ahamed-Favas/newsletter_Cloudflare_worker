@@ -65,23 +65,24 @@ export function generateEmail(feedsData, unsubUrl) {
                                                                   </td>
                                                                </tr>
                                                                <!-- Image -->
+                                                               ${feed?.ImageUrl?.trim() ? `
                                                                <tr>
                                                                   <td align="center" class="news-image" style="font-size:0px;padding:0;word-break:break-word;">
                                                                      <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:collapse;border-spacing:0px;">
                                                                         <tbody>
                                                                            <tr>
                                                                               <td style="width:600px;">
-                                                                                 <img alt="news image" height="auto" src=${feed?.imageUrl?.trim()} style="max-height: 300px; object-fit: contain; box-shadow: 0px 2px 6px rgba(0,0,0,0.15); border: 0; display: block; outline: none; text-decoration: none; font-size: 13px; width: 100%; height: auto;" width="600">
+                                                                                 <img alt="news image" height="auto" src=${feed?.ImageUrl?.trim()} style="max-height: 300px; object-fit: contain; box-shadow: 0px 2px 6px rgba(0,0,0,0.15); border: 0; display: block; outline: none; text-decoration: none; font-size: 13px; width: 100%; height: auto;" width="600">
                                                                               </td>
                                                                            </tr>
                                                                         </tbody>
                                                                      </table>
                                                                   </td>
-                                                               </tr>
+                                                               </tr>`: ``}
                                                                <!-- Summary -->
                                                                <tr>
                                                                   <td align="left" style="font-size:0px;padding:6px 6px;word-break:break-word;">
-                                                                     <div style="font-family:Helvetica, Arial, sans-serif;font-size:14px;line-height:120%;text-align:left;color:#000000;">${sanitizeHtml(feed?.description?.trim())}</div>
+                                                                     <div style="font-family:Helvetica, Arial, sans-serif;font-size:14px;line-height:120%;text-align:left;color:#000000;">${sanitizeHtml(feed?.Description?.trim())}</div>
                                                                   </td>
                                                                </tr>
                                                                <!-- Read More Link -->

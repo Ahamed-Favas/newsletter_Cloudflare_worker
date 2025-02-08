@@ -51,6 +51,7 @@ async function processSource(source, env) {
     const feedName = source.name;
     const url = source.url;
     const category = source.category;
+    const contentClass = source.contentClass;
     try {
         const response = await fetchUrl(url, env);
         const text = await response.text();
@@ -65,7 +66,7 @@ async function processSource(source, env) {
                 const link = item.getElementsByTagName("link")[0]?.textContent;
                 if (!link) return null;
                 
-                const description = item.getElementsByTagName("description")[0]?.textContent || item.getElementsByTagName("summary")[0]?.textContent || null;
+                const description = item.getElementsByTagName("description")[0]?.textContent.replace(/<[^>]*>/g, '') || item.getElementsByTagName("summary")[0]?.textContent.replace(/<[^>]*>/g, '') || null;  // regex is to remove any html tags
 
                 const enclosure = item.getElementsByTagName("enclosure")[0];
                 let imageUrl = enclosure && enclosure.getAttribute("type")?.startsWith("image/") ?
@@ -80,6 +81,7 @@ async function processSource(source, env) {
                     id: item.getElementsByTagName("guid")[0]?.textContent || "",
                     description: description,
                     imageUrl: imageUrl,
+                    contentClass: contentClass,
                     createdAt: new Date().toISOString()     
                 };
             });
@@ -94,7 +96,7 @@ async function processSource(source, env) {
                 const pubDateStr = item.getElementsByTagName("published")[0]?.textContent || 
                                 item.getElementsByTagName("updated")[0]?.textContent;
                 
-                const description = item.getElementsByTagName("content")[0]?.textContent || null
+                const description = item.getElementsByTagName("content")[0]?.textContent.replace(/<[^>]*>/g, '') || null
                 
                 const enclosureLink = links.find(link => 
                     link.getAttribute("rel") === "enclosure" && 
@@ -111,6 +113,7 @@ async function processSource(source, env) {
                     id: item.getElementsByTagName("id")[0]?.textContent || "",
                     description: description,
                     imageUrl: imageUrl,
+                    contentClass: contentClass,
                     createdAt: new Date().toISOString()
                 };
             });

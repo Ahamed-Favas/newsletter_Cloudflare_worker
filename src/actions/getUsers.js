@@ -1,4 +1,4 @@
-import { SignJWT } from "jose";
+import { jwtDecrypt, SignJWT } from "jose";
 
 async function fetchApi(url, secret) {
     const authToken = await new SignJWT({ user: "cloudflare-worker" })
@@ -21,14 +21,16 @@ async function fetchApi(url, secret) {
         console.log(`Failed while getting API response: ${response.status}`)
         throw new Error(`Failed while getting API response: ${response.status}`);
     }
-    return await response.json()
+    const { token } = await response.json();
+    const { payload } = await jwtDecrypt(token, secret);
+    return payload.users;
 }
 
 export async function getUsers(env) {
     const secret = new TextEncoder().encode(env.JWT_SECRET);
     const apiUrl = env.VERCEL_API;
     try {
-        const { users } = await fetchApi(apiUrl, secret);
+        const users = await fetchApi(apiUrl, secret);
         return users
     } catch (error) {
         throw new Error(`Failed while getting API getting emails: ${error}`);
