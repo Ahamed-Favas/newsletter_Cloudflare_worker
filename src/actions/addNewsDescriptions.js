@@ -62,9 +62,9 @@ export async function addNewsDescriptions(topNews, env) {
                     continue;
                 }
             }
+            continue;
         }
     }
-    
     return topNews;
 }
 

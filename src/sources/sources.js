@@ -1,5 +1,5 @@
 export const sources = [
-    {category: "Top stories", name: "timesofindia_topstories", url: "https://timesofindia.indiatimes.com/rssfeedstopstories.cms", contentClass: "_s30J clearfix"},
+    {category: "Top Stories", name: "timesofindia_topstories", url: "https://timesofindia.indiatimes.com/rssfeedstopstories.cms", contentClass: "_s30J clearfix"},
     {category: "India", name: "timesofindia_india", url: "https://timesofindia.indiatimes.com/rssfeeds/-2128936835.cms", contentClass: "_s30J clearfix"},
     {category: "World", name: "timesofindia_world", url: "https://timesofindia.indiatimes.com/rssfeeds/296589292.cms", contentClass: "_s30J clearfix"},
     {category: "Business", name: "timesofindia_business", url: "https://timesofindia.indiatimes.com/rssfeeds/1898055.cms", contentClass: "_s30J clearfix"},

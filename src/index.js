@@ -24,6 +24,58 @@ export default {
           break;
     }
   },
+  // async fetch(request, env) {
+  //   const { results } = await env.DB
+  //       .prepare(
+  //         "SELECT * FROM NewsCollection WHERE pubDate > datetime('now', '-1 day')")
+  //       .all();
+  //       const newsGrouped = {};
+    
+  //   results.forEach(news => {
+  //     const categoryValue = news.Category;
+  //     if (!newsGrouped[categoryValue]) {
+  //       newsGrouped[categoryValue] = []
+  //     }
+  //     newsGrouped[categoryValue].push(news)
+  //   })
+
+  //   let topNews = {};
+  //   for (const category of Object.keys(newsGrouped)) {
+
+  //     const newsList = newsGrouped[category];
+  //     const newsHeadlines = newsList.map(n => n.Title).join('\n');
+  //     // Asking AI to select top news headlines
+
+  //     const messages = [
+  //     { role: "system", content: "You are a journalist" },
+  //     {
+  //         role: "user",
+  //         content: `From the following news headlines, order them from highest to lowest based on their impactfulness or news value, Return only the corresponding line numbers (1-based), separated by commas:\n\n${
+  //           newsHeadlines}`,
+  //       },
+  //     ];
+  //     const rankingResponse = await env.AI.run("@hf/meta-llama/meta-llama-3-8b-instruct", { messages });
+  //     // Parse indices
+  //     let selectedIndices = []
+  //     try {
+  //       selectedIndices =
+  //         rankingResponse.response.split(',')
+  //           .map(n => parseInt(n.trim()) - 1)
+  //           .filter(n => !isNaN(n) && n >= 0 && n < newsList.length)
+  //           .slice(0, 10);
+  //     } catch (error) {
+  //       console.warn("failed to parse ai indeces")
+  //       selectedIndices = newsList.slice(0, 10) // adjusting with available data
+  //     }
+
+  //     // Order results based on indices
+  //     const selectedNews = selectedIndices.map(index => newsList[index]);
+  //     topNews[category] = selectedNews;
+  //   }
+  //   // generate summary for all selected news
+  //   topNews = await addNewsDescriptions(topNews, env);
+  //   return new Response(JSON.stringify(topNews))
+  // }
 };
 
 async function handleScheduledAction(env)
@@ -101,12 +153,17 @@ async function handleScheduledMailing(env)
 
       const newsList = newsGrouped[category];
       const newsHeadlines = newsList.map(n => n.Title).join('\n');
+      
       // Asking AI to select top news headlines
-      const rankingResponse = await env.AI.run("@cf/meta/llama-2-7b-chat-int8", {
-        prompt :
-          `From the following news headlines, select up to 10 that are the most impactful and engaging for a broad audience. Return only the corresponding line numbers (1-based), separated by commas:\n\n${
+      const messages = [
+      { role: "system", content: "You are a journalist" },
+      {
+          role: "user",
+          content: `From the following news headlines, order them from highest to lowest based on their impactfulness or news value, Return only the corresponding line numbers (1-based), separated by commas:\n\n${
             newsHeadlines}`,
-      });
+        },
+      ];
+      const rankingResponse = await env.AI.run("@hf/meta-llama/meta-llama-3-8b-instruct", { messages });
       // Parse indices
       let selectedIndices = []
       try {
@@ -114,7 +171,7 @@ async function handleScheduledMailing(env)
           rankingResponse.response.split(',')
             .map(n => parseInt(n.trim()) - 1)
             .filter(n => !isNaN(n) && n >= 0 && n < newsList.length)
-            .slice(0, 10);
+            .slice(0, 10);  //  select upto 10 news
       } catch (error) {
         console.warn("failed to parse ai indeces")
         selectedIndices = newsList.slice(0, 10) // adjusting with available data
@@ -124,7 +181,7 @@ async function handleScheduledMailing(env)
       const selectedNews = selectedIndices.map(index => newsList[index]);
       topNews[category] = selectedNews;
     }
-    // to do : generate summary for null description / img description
+    // generate summary for all selected news
     topNews = await addNewsDescriptions(topNews, env);
     // generate emailhtml and send for each user
     // @ts-ignore
@@ -132,7 +189,7 @@ async function handleScheduledMailing(env)
 
       const userEmail = user.email;
       const unsubscribeToken = user.unsubToken;
-      const unsubUrl = `https://https://newsletter.pastpricing.com/api/mongo/${
+      const unsubUrl = `https://newsletter.pastpricing.com/api/mongo/${
         unsubscribeToken}`
       const userPrefers =
         Object.keys(user.preferences).filter(key => user.preferences[key]);
