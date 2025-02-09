@@ -46,7 +46,7 @@ export async function addNewsDescriptions(topNews, env) {
                         if (content) {
                             // Ask the AI for a summary
                             try {
-                                const prompt = `Create a very short summary (2-3 sentences) of the following news content:\n\n${content}`;
+                                const prompt = `Create a very short summary (2-3 sentences) of the following news content, only the summary is required, dont say here is the summary etc... :\n\n${content}`;
                                 const BedRockResponse = await fetchAPI(BedrockApi, BedrockApiKey, prompt);
                                 if (BedRockResponse?.response) {
                                     topNews[category][i].Description = BedRockResponse.response.trim();

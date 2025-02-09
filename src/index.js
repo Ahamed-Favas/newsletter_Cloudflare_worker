@@ -171,7 +171,7 @@ async function handleScheduledMailing(env)
           rankingResponse.response.split(',')
             .map(n => parseInt(n.trim()) - 1)
             .filter(n => !isNaN(n) && n >= 0 && n < newsList.length)
-            .slice(0, 8);  //  select upto 6 news
+            .slice(0, 8);  //  select upto 8 news
       } catch (error) {
         console.warn("failed to parse ai indeces")
         selectedIndices = newsList.slice(0, 8) // adjusting with available data
