@@ -131,7 +131,7 @@ async function handleScheduledMailing(env)
     const { results } =
       await env.DB
         .prepare(
-          "SELECT * FROM NewsCollection WHERE pubDate > datetime('now', '-1 day')")
+          "SELECT * FROM NewsCollection WHERE createdAt > datetime('now', '-1 day')")
         .all();
 
     if (!results || !Array.isArray(results)) {
@@ -171,10 +171,10 @@ async function handleScheduledMailing(env)
           rankingResponse.response.split(',')
             .map(n => parseInt(n.trim()) - 1)
             .filter(n => !isNaN(n) && n >= 0 && n < newsList.length)
-            .slice(0, 10);  //  select upto 10 news
+            .slice(0, 6);  //  select upto 10 news
       } catch (error) {
         console.warn("failed to parse ai indeces")
-        selectedIndices = newsList.slice(0, 10) // adjusting with available data
+        selectedIndices = newsList.slice(0, 6) // adjusting with available data
       }
 
       // Order results based on indices
