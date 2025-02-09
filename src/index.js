@@ -205,7 +205,7 @@ async function handleScheduledMailing(env)
       });
       if (selectedFeeds.length === 0) {
         console.log(`mail is not send for ${userEmail} (selectedFeed is zero)`)
-        return
+        continue;
       }
       const emailHtml = generateEmail(selectedFeeds, unsubUrl);
       const emailResponse = await sendEmail(env, emailHtml, userEmail)
