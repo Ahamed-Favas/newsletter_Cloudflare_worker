@@ -9,8 +9,7 @@ export default {
   async scheduled(event, env, ctx) {
     console.log("Running scheduled task at:", event.cron);
     switch (event.cron) {
-      case "0 */4 * * *": // Runs at every 4 hours daily, 05:30, 09:30, 13:30
-                          // 17:30, 21:30, 01:30 IST
+      case "0 */6 * * *": // Runs at every 6 hours daily
         ctx.waitUntil(handleScheduledAction(env).catch(
           error => { console.error("Scheduled action failed:", error); }));
         break;

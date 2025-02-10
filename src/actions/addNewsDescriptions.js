@@ -1,10 +1,9 @@
-import { DOMParser } from 'xmldom';
-
 export async function addNewsDescriptions(topNews, env) {
     const BedrockApi = env.BedrockApi;
     const BedrockApiKey = env.BedrockApiKey;
-    const parser = new DOMParser();
 
+    const newsItems = [];
+    
     for (const category of Object.keys(topNews)) {
         const newsList = topNews[category];
 
@@ -12,66 +11,42 @@ export async function addNewsDescriptions(topNews, env) {
             const news = newsList[i];
 
             if (!news.Description) {
-                try {
-                    const url = news.Link;
-                    const contentClass = news.contentClass;
-                    
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 10000);
-                    let response;
-                    try {
-                        response = await fetch(url, { 
-                            signal: controller.signal,
-                            headers: {
-                                'User-Agent': 'RSS Digest Bot/1.0'
-                            }
-                        });
-                    } finally {
-                        clearTimeout(timeoutId);
-                    }
-                    
-                    if (!response.ok) {
-                        console.warn(`Failed to fetch content for URL: ${url}`);
-                        continue;
-                    }
+                newsItems.push({
+                    Link: news.Link,
+                    contentClass: news.contentClass,
+                    category,
+                    index: i
+                });
+            }
+        }
+    }
 
-                    const html = await response.text();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const contentElements = Array.from(doc.getElementsByClassName(contentClass));
-                    
-                    if (contentElements.length > 0) {
-                        const firstElement = contentElements[0];
-                        const content = firstElement?.textContent?.trim();
-                        
-                        if (content) {
-                            // Ask the AI for a summary
-                            try {
-                                const prompt = `Create a very short summary (2-3 sentences) of the following news content, only the summary is required, dont say here is the summary etc... :\n\n${content}`;
-                                const BedRockResponse = await fetchAPI(BedrockApi, BedrockApiKey, prompt);
-                                if (BedRockResponse?.response) {
-                                    topNews[category][i].Description = BedRockResponse.response.trim();
-                                }
-                            } catch (aiError) {
-                                console.warn(`Failed to generate AI summary for news: ${news.Link}`, aiError);
-                            }
-                        }
+    if ( newsItems.length > 0 ) {
+        try {
+            const payload = { news: newsItems }
+            const lambdaResponse = await fetchAPI(BedrockApi, BedrockApiKey, payload);
+
+            if ( lambdaResponse && Array.isArray(lambdaResponse.summaries )) {
+                for (const item of lambdaResponse.summaries) {
+                    const { category, indexStr, description } = item;
+
+                    // const [category, indexStr] = id.split('-');
+                    const index = parseInt(indexStr, 10);
+                    if ( topNews[category] && topNews[category][index] ) {
+                        topNews[category][index].Description = description;
                     }
-                } catch (error) {
-                    console.warn(`Error processing news item: ${news.Link}`, error);
-                    // If an error occurs, keep the original (missing) description
-                    continue;
                 }
             }
-            continue;
+        } catch (error) {
+            console.warn("Failed to fetch summaries from Lambda", error)
         }
     }
     return topNews;
 }
 
-
-async function fetchAPI(url, key, prompt) {
+async function fetchAPI(url, key, payload) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    const timeoutId = setTimeout(() => controller.abort(), 300000);
     let response;
     try {
         response = await fetch(url, { 
@@ -81,17 +56,16 @@ async function fetchAPI(url, key, prompt) {
                 'x-api-key': key,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ prompt })
+            body: JSON.stringify(payload)
         });
     } finally {
         clearTimeout(timeoutId);
     }
     
     if (!response.ok) {
-        console.log(`Failed to fetch feed: ${response.status}`);
-        throw new Error(`Failed to fetch feed: ${response.status}`);
+        console.log(`Failed to fetch feed from lambda: ${response.status}`);
+        throw new Error(`Failed to fetch feed from lambda: ${response.status}`);
     }
-    
-    const BedRockResponse = await response.json();
-    return BedRockResponse;
+
+    return await response.json();
 }
