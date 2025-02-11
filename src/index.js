@@ -23,13 +23,16 @@ export default {
           break;
     }
   },
-  // async fetch(request, env) {
-  //   const { results } = await env.DB
-  //       .prepare(
-  //         "SELECT * FROM NewsCollection WHERE pubDate > datetime('now', '-1 day')")
-  //       .all();
-  //       const newsGrouped = {};
+  async fetch(request, env) {
+    const { results } = await env.DB
+        .prepare(
+          "SELECT * FROM NewsCollection WHERE pubDate > datetime('now', '-1 day')")
+        .all();
+        const newsGrouped = {};
     
+    const titles = results.map(news => {
+      return news.Title
+    })
   //   results.forEach(news => {
   //     const categoryValue = news.Category;
   //     if (!newsGrouped[categoryValue]) {
@@ -73,8 +76,8 @@ export default {
   //   }
   //   // generate summary for all selected news
   //   topNews = await addNewsDescriptions(topNews, env);
-  //   return new Response(JSON.stringify(topNews))
-  // }
+    return new Response(JSON.stringify(titles))
+  }
 };
 
 async function handleScheduledAction(env)
@@ -162,7 +165,7 @@ async function handleScheduledMailing(env)
             newsHeadlines}`,
         },
       ];
-      const rankingResponse = await env.AI.run("@hf/meta-llama/meta-llama-3-8b-instruct", { messages });
+      const rankingResponse = await env.AI.run("@cf/deepseek-ai/deepseek-r1-distill-qwen-32b", { messages });
       // Parse indices
       let selectedIndices = []
       try {
