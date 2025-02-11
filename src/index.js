@@ -130,7 +130,7 @@ async function handleScheduledMailing(env)
     const { results } =
       await env.DB
         .prepare(
-          "SELECT * FROM NewsCollection WHERE createdAt > datetime('now', '-1 day')")
+          "SELECT * FROM NewsCollection WHERE pubDate > datetime('now', '-1 day')")
         .all();
 
     if (!results || !Array.isArray(results)) {
