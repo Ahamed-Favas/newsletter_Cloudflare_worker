@@ -197,7 +197,7 @@ async function handleScheduledMailing(env)
 
       const userEmail = user.email;
       const unsubscribeToken = user.unsubToken;
-      const unsubUrl = `https://newsletter.pastpricing.com/api/mongo/${
+      const unsubUrl = `https://newsletter.pastpricing.com/unsubscribe/${
         unsubscribeToken}`
       const userPrefers =
         Object.keys(user.preferences).filter(key => user.preferences[key]);
