@@ -31,6 +31,23 @@ export async function getUsers(env) {
     const apiUrl = env.VERCEL_API;
     try {
         const users = await fetchApi(apiUrl, secret);
+        // const users = [
+        //     {
+        //         email: env.test_email,
+        //         unsubToken: "abc123",
+        //         preferences: {
+        //             "Top Stories": true,
+        //             "India": true,
+        //             "World": true,
+        //             "Business": true,
+        //             "Sports": true,
+        //             "Tech": true,
+        //             "Environment": true,
+        //             "Kerala": true,
+        //             "Life & Style": true
+        //         }
+        //     }
+        // ]
         return users
     } catch (error) {
         throw new Error(`Failed while getting API getting emails: ${error}`);
