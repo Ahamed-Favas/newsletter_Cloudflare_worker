@@ -85,7 +85,7 @@ export default {
   //   }
   //   // generate summary for all selected news
   //   topNews = await addNewsDescriptions(topNews, env);
-  //   return new Response(JSON.stringify(results))
+    // return new Response(JSON.stringify({k: env.awsApiKey}))
   // }
 };
 
@@ -195,7 +195,10 @@ async function handleScheduledMailing(env)
       topNews[category] = selectedNews;
     }
     // generate summary for all selected news
-    topNews = await addNewsDescriptions(topNews, env);
+    topNews = await addNewsDescriptions(topNews, env).catch(error => {
+      console.error('Failed to enrich description:', error);
+      return topNews; // fallback to the original value
+    });
     // generate emailhtml and send for each user
     // @ts-ignore
     for (const user of users) {
