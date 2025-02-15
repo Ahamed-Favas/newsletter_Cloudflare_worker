@@ -35,7 +35,8 @@ async function fetchUrl(url, env) {
 
 
 export async function parseFeed(sources, env) {
-    const allItems = []
+
+    let allItems = []
     for (const source of sources) {
         const items = await processSource(source, env).catch(error => {
             console.error(`Error processing ${source.url}:`, error);
@@ -43,6 +44,20 @@ export async function parseFeed(sources, env) {
         });
         allItems.push(...items);
     }
+    //  deduping allItems
+    const uniqueItemsMap = new Map();
+    allItems.forEach(item => {
+        if (!uniqueItemsMap.has(item.link)) {
+            uniqueItemsMap.set(item.link, item);
+        }
+    });
+    allItems = Array.from(uniqueItemsMap.values());
+
+    //  to dedupe with db
+    const allLinks = new Set(await getAllLinks(env));
+    allItems = allItems.filter(item => !allLinks.has(item.link))
+    console.log(`fetched total items of ${allItems.length}`)
+    
     return allItems;
 }
 
@@ -121,20 +136,9 @@ async function processSource(source, env) {
         else {
             throw new Error("Unsupported feed format");
         }
+        
         // keeping items which are not null or undefined
         items = items.filter(item => item !== null && item !== undefined );
-        //  to dedupe in item
-        const uniqueItemsMap = new Map();
-        items.forEach(item => {
-        if (!uniqueItemsMap.has(item.link)) {
-            uniqueItemsMap.set(item.link, item);
-        }
-        });
-        items = Array.from(uniqueItemsMap.values());
-        console.log("Fetched (before deduping with db)", items.length, "items from", feedName);
-        //  to dedupe with db
-        const allLinks = new Set(await getAllLinks(env));
-        items = items.filter(item => !allLinks.has(item.link))
         return items;
     } catch (error) {
         console.error('Feed parsing error:', error);
