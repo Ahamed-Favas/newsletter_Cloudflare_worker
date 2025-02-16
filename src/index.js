@@ -17,6 +17,7 @@ export default {
         ctx.waitUntil(handleScheduledDeletion(env).catch(
           error => { console.error("Scheduled deletion failed:", error); }));
         break;
+      // dont forgot getUsers.js
       case "30 1 * * *": // Runs at every 7 AM IST
         ctx.waitUntil(handleScheduledMailing(env).catch(
           error => { console.error("Scheduled mailing failed:", error); }));

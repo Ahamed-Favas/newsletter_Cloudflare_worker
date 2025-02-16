@@ -57,7 +57,7 @@ export function generateEmail(feedsData, unsubUrl) {
                           <tr>
                             <!-- Text Column -->
                             <td style="vertical-align: top;">
-                              <div style="font-family: 'Inter', sans-serif; font-size:12px; line-height:1; text-align:center; color:#999999; margin-bottom:4px;">
+                              <div style="font-family: 'Inter', sans-serif; font-size:12px; line-height:1; text-align:left; color:#999999; margin-bottom:4px;">
                                 ${sanitizeHtml(convertDateTime(feed?.pubDate?.trim()))}
                               </div>
                               <!-- Summary/Description -->
@@ -77,7 +77,7 @@ export function generateEmail(feedsData, unsubUrl) {
                         </table>
                         ` : `
                         <!-- Single Column Layout (only text) -->
-                        <div style="font-family: 'Inter', sans-serif; font-size:12px; line-height:1; text-align:center; color:#999999; margin-bottom:4px;">
+                        <div style="font-family: 'Inter', sans-serif; font-size:12px; line-height:1; text-align:left; color:#999999; margin-bottom:4px;">
                           ${sanitizeHtml(convertDateTime(feed?.pubDate?.trim()))}
                         </div>
                         <div style="font-family: 'Inter', sans-serif; font-size:14px; line-height:120%; text-align:left; color:#000000; margin-bottom:4px;">
