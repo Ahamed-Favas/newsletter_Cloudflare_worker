@@ -9,7 +9,7 @@ export default {
   async scheduled(event, env, ctx) {
     console.log("Running scheduled task at:", event.cron);
     switch (event.cron) {
-      case "0 */6 * * *": // Runs at every 6 hours daily
+      case "0 1,5,9,13,17,21 * * *": // Runs at every 4 hours daily, starting at 6.30 AM
         ctx.waitUntil(handleScheduledAction(env).catch(
           error => { console.error("Scheduled action failed:", error); }));
         break;
@@ -169,11 +169,11 @@ async function handleScheduledMailing(env)
       const messages = [
         {
           role: "system",
-          content: "You are an AI agent tasked with selecting the most impactful news article from a given list of news titles. Your goal is to prioritize stories that have the highest significance based on the following criteria:\n\n1. **Timeliness & Urgency** – Events or developments that require immediate attention or have a short-term impact.\n2. **Relevance to the Niche** – Stories that directly affect industries, interests, or daily concerns.\n3. **Widespread Impact** – News that influences a large number of people, businesses, or systems.\n4. **Uniqueness & Novelty** – Highly unique, unexpected, or groundbreaking stories that stand out from routine updates.\n5. **Long-Term Consequences** – Events that may shape trends, regulations, or major shifts over time.\n\n### Important Rule:\n- **Avoid selecting follow-up or repetitive news on the same topic.** If multiple headlines cover the same event or development, choose **only the most significant or earliest one** and ignore related follow-ups.\n\nYour task is to analyze the list of news titles and select the single most impactful story. Return **only its index (1-based)** with no additional text."
+          content: "You are an AI agent tasked with selecting the most impactful news articles from a given list of news titles. Your goal is to prioritize stories that have the highest significance based on the following criteria:\n\n1. **Timeliness & Urgency** – Events or developments that require immediate attention or have a short-term impact.\n2. **Relevance to the Niche** – Stories that directly affect the target audience's industry, interests, or daily concerns.\n3. **Widespread Impact** – News that influences a large number of people, businesses, or systems.\n4. **Uniqueness & Novelty** – Highly unique, unexpected, or groundbreaking stories that stand out from routine updates.\n5. **Long-Term Consequences** – Events that may shape trends, regulations, or major shifts over time.\n\nYour task is to analyze the list of news titles and rank them based on these criteria. Select the upto 15 most impactful stories** and return only their indexes (1-based) in a comma-separated format with no additional text."
         },
         {
           role: "user",
-          content: `Below is a list of news headlines. Please analyze them and return only the index (1-based) of the most impactful one, seperated by commas, and with no additional text, also ensuring no follow-up or repetitive news is included:\n\n${newsHeadlines}`
+          content: `Below is a list of news headlines. Please analyze them and return only the indexes (1-based) of the most impactful ones, separated by commas,  with no additional text:\n\n${newsHeadlines}`
         }
       ];
       const rankingResponse = await env.AI.run("@cf/meta/llama-3.1-70b-instruct", { messages });
@@ -184,10 +184,10 @@ async function handleScheduledMailing(env)
           rankingResponse.response.split(',')
             .map(n => parseInt(n.trim()) - 1)
             .filter(n => !isNaN(n) && n >= 0 && n < newsList.length)
-            .slice(0, 8);  //  select upto 8 news
+            .slice(0, 15);  //  select upto 15 news
       } catch (error) {
         console.warn("failed to parse ai indeces")
-        selectedIndices = newsList.slice(0, 8) // adjusting with available data
+        selectedIndices = newsList.slice(0, 15) // adjusting with available data
       }
 
       // Order results based on indices
