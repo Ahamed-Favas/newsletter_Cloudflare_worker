@@ -181,7 +181,12 @@ async function handleScheduledMailing(env)
       try {
         rankingResponse = await env.AI.run("@cf/deepseek-ai/deepseek-r1-distill-qwen-32b", { messages });
       } catch (error) {
-        console.warn("AI failed to pick top news")
+        console.warn("AI failed to pick top news at initial try")
+        try {
+          rankingResponse = await env.AI.run("@cf/meta/llama-3.1-70b-instruct", { messages });
+        } catch (error) {
+          console.warn("AI failed to pick top news at fallback")
+        }
       }
       
       // Parse indices
