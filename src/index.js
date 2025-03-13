@@ -170,14 +170,20 @@ async function handleScheduledMailing(env)
       const messages = [
         {
           role: "system",
-          content: "You are an AI agent tasked with selecting the most impactful news articles from a given list of news titles. Your goal is to prioritize stories that have the highest significance based on the following criteria:\n\n1. **Timeliness & Urgency** – Events or developments that require immediate attention or have a short-term impact.\n2. **Relevance to the Niche** – Stories that directly affect the target audience's industry, interests, or daily concerns.\n3. **Widespread Impact** – News that influences a large number of people, businesses, or systems.\n4. **Uniqueness & Novelty** – Highly unique, unexpected, or groundbreaking stories that stand out from routine updates.\n5. **Long-Term Consequences** – Events that may shape trends, regulations, or major shifts over time.\n\nYour task is to analyze the list of news titles and rank them based on these criteria. Select the upto 15 most impactful stories** and return only their indexes (1-based) in a comma-separated format with no additional text."
+          content: "You are an AI agent tasked with selecting the most impactful news articles from a given list of news titles. Your goal is to prioritize stories that have the highest significance based on the following criteria:1. Timeliness & Urgency – Events or developments that require immediate attention or have a short-term impact. 2. Relevance to the Niche – Stories that directly affect the target audience's industry, interests, or daily concerns. 3. Widespread Impact – News that influences a large number of people, businesses, or systems. 4. Uniqueness & Novelty – Highly unique, unexpected, or groundbreaking stories that stand out from routine updates. 5. Long-Term Consequences – Events that may shape trends, regulations, or major shifts over time. Your task is to analyze the list of news titles and rank them based on these criteria. Select the upto 15 most impactful stories and return only their indexes (1-based) in a comma-separated format with no additional text."
         },
         {
           role: "user",
-          content: `Below is a list of news headlines. Please analyze them and return only the indexes (1-based) of the most impactful ones, separated by commas,  with no additional text:\n\n${newsHeadlines}`
+          content: `Below is a list of news headlines. Please analyze them and return only the indexes (1-based) of the most impactful ones, separated by commas, with no additional text: ${newsHeadlines}`
         }
       ];
-      const rankingResponse = await env.AI.run("@cf/meta/llama-3.1-70b-instruct", { messages });
+      let rankingResponse = {}
+      try {
+        rankingResponse = await env.AI.run("@cf/deepseek-ai/deepseek-r1-distill-qwen-32b", { messages });
+      } catch (error) {
+        console.warn("AI failed to pick top news")
+      }
+      
       // Parse indices
       let selectedIndices = []
       try {
